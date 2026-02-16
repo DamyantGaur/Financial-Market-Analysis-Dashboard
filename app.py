@@ -364,7 +364,8 @@ def render_technical_analysis(df: pd.DataFrame, ticker: str):
                           annotation_text="Oversold (30)")
         fig_rsi.add_hrect(y0=30, y1=70, fillcolor="rgba(99,102,241,0.05)",
                           line_width=0)
-        fig_rsi.update_layout(**PLOTLY_LAYOUT, height=350, title="RSI (14-Period)",
+        fig_rsi.update_layout(**PLOTLY_LAYOUT)
+        fig_rsi.update_layout(height=350, title="RSI (14-Period)",
                               yaxis=dict(range=[0, 100], gridcolor="rgba(100,120,255,0.08)"))
         st.plotly_chart(fig_rsi, use_container_width=True)
 
@@ -429,7 +430,8 @@ def render_technical_analysis(df: pd.DataFrame, ticker: str):
                             annotation_text="Overbought")
         fig_stoch.add_hline(y=20, line_dash="dash", line_color=COLORS["positive"],
                             annotation_text="Oversold")
-        fig_stoch.update_layout(**PLOTLY_LAYOUT, height=300,
+        fig_stoch.update_layout(**PLOTLY_LAYOUT)
+        fig_stoch.update_layout(height=300,
                                 title="Stochastic Oscillator (%K, %D)",
                                 yaxis=dict(range=[0, 100], gridcolor="rgba(100,120,255,0.08)"))
     st.plotly_chart(fig_stoch, use_container_width=True)

@@ -60,24 +60,30 @@ def compute_rsi(df: pd.DataFrame, column: str = "Close", period: int = 14) -> pd
     pd.DataFrame
         DataFrame with RSI column added.
     """
-    result = df.copy()
-    delta = result[column].diff()
+    try:
+        import ta
+        result = df.copy()
+        rsi_indicator = ta.momentum.RSIIndicator(close=result[column], window=period)
+        result["RSI"] = rsi_indicator.rsi()
+        return result
+    except ImportError:
+        # Fallback to manual implementation if ta is missing (though it should be there)
+        result = df.copy()
+        delta = result[column].diff()
 
-    gain = delta.where(delta > 0, 0.0)
-    loss = -delta.where(delta < 0, 0.0)
+        gain = delta.where(delta > 0, 0.0)
+        loss = -delta.where(delta < 0, 0.0)
 
-    avg_gain = gain.rolling(window=period, min_periods=period).mean()
-    avg_loss = loss.rolling(window=period, min_periods=period).mean()
+        avg_gain = gain.rolling(window=period, min_periods=period).mean()
+        avg_loss = loss.rolling(window=period, min_periods=period).mean()
 
-    # Use Wilder's smoothing after initial SMA
-    for i in range(period, len(avg_gain)):
-        avg_gain.iloc[i] = (avg_gain.iloc[i - 1] * (period - 1) + gain.iloc[i]) / period
-        avg_loss.iloc[i] = (avg_loss.iloc[i - 1] * (period - 1) + loss.iloc[i]) / period
+        for i in range(period, len(avg_gain)):
+            avg_gain.iloc[i] = (avg_gain.iloc[i - 1] * (period - 1) + gain.iloc[i]) / period
+            avg_loss.iloc[i] = (avg_loss.iloc[i - 1] * (period - 1) + loss.iloc[i]) / period
 
-    rs = avg_gain / avg_loss
-    result["RSI"] = 100 - (100 / (1 + rs))
-
-    return result
+        rs = avg_gain / avg_loss
+        result["RSI"] = 100 - (100 / (1 + rs))
+        return result
 
 
 def compute_macd(
